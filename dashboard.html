@@ -9,15 +9,19 @@
 </head>
 <body>
     <header>
-        <h1>Team Activity Dashboard</h1>
-        <a href="index.html" class="back-btn">Back to Planner</a>
+        <h1 class="header-title">Team Activity Dashboard</h1>
+        <a href="index.html" class="btn btn-back">Back to Planner</a>
     </header>
     <main>
-        <button id="download-dashboard-btn">Download Dashboard</button>
-        <div id="calendars-container" class="calendars-grid"></div>
+        <section class="card">
+            <div class="dashboard-controls">
+                <button id="download-dashboard-btn" class="btn btn-primary">Download Dashboard</button>
+            </div>
+            <div id="calendars-container" class="calendars-grid"></div>
+        </section>
     </main>
 
-    <script src="utils.js"></script>
-    <script src="dashboard.js"></script>
+    <script src="utils.js" type="module"></script>
+    <script src="dashboard.js" type="module"></script>
 </body>
 </html>
