@@ -9,14 +9,16 @@ const loadDashboard = () => {
 
     const projects = JSON.parse(data);
     const allTasks = projects.flatMap(p => p.areas.flatMap(a => a.tasks));
-    const teams = [...new Set(allTasks.map(t => t.team))];
+    const teams = [...new Set(allTasks.map(t => t.team))].filter(team => team);
 
     if (teams.length > 0) {
-        renderCalendars(teams, allTasks);
+        renderCalendars(teams, allTasks, projects);
+    } else {
+        calendarsContainer.innerHTML = '<p>No tasks found to display.</p>';
     }
 };
 
-const renderCalendars = (teams, allTasks) => {
+const renderCalendars = (teams, allTasks, projects) => {
     calendarsContainer.innerHTML = '';
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -59,7 +61,12 @@ const renderCalendars = (teams, allTasks) => {
 
             if (tasksOnDay.length > 0) {
                 dayDiv.addEventListener('click', () => {
-                    alert(`Tasks for ${team} on ${formattedDate}:\n${tasksOnDay.map(t => `Area: ${getAreaNameForTask(t.id, projects)}\nTeam: ${t.team}\nStart: ${t.startDate}\nEnd: ${t.endDate}`).join('\n\n')}`);
+                    const taskDetails = tasksOnDay.map(t => {
+                        const projectName = projects.find(p => p.areas.some(a => a.tasks.some(task => task.id === t.id)))?.name || 'Unknown Project';
+                        const areaName = projects.flatMap(p => p.areas).find(a => a.tasks.some(task => task.id === t.id))?.name || 'Unknown Area';
+                        return `Project: ${projectName}\nArea: ${areaName}\nStart: ${t.startDate}\nEnd: ${t.endDate}`;
+                    }).join('\n\n');
+                    alert(`Tasks for ${team} on ${formattedDate}:\n\n${taskDetails}`);
                 });
             }
             calendarGrid.appendChild(dayDiv);
@@ -67,17 +74,6 @@ const renderCalendars = (teams, allTasks) => {
 
         calendarsContainer.appendChild(teamCalendar);
     });
-};
-
-const getAreaNameForTask = (taskId, projects) => {
-    for (const project of projects) {
-        for (const area of project.areas) {
-            if (area.tasks.some(t => t.id === taskId)) {
-                return area.name;
-            }
-        }
-    }
-    return 'Unknown Area';
 };
 
 document.getElementById('download-dashboard-btn').addEventListener('click', () => downloadPageAsImage('team-dashboard.png'));
