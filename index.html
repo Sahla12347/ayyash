@@ -9,32 +9,37 @@
 </head>
 <body>
     <header>
-        <h1>Project Planner</h1>
+        <h1 class="header-title">Project Planner</h1>
     </header>
     <main>
-        <section class="project-management">
-            <label for="project-select">Select Project:</label>
-            <select id="project-select"></select>
-            <button id="new-project-btn">New Project</button>
-            <button id="delete-project-btn">Delete Project</button>
+        <section class="card project-management">
+            <div class="input-group">
+                <label for="project-select">Select Project:</label>
+                <select id="project-select"></select>
+            </div>
+            <div class="button-group">
+                <button id="new-project-btn" class="btn btn-primary">New Project</button>
+                <button id="delete-project-btn" class="btn btn-danger">Delete Project</button>
+            </div>
         </section>
 
-        <section class="task-input-section">
+        <section class="card task-input-section">
+            <h2>Project Areas</h2>
             <div id="areas-container"></div>
-            <button id="add-area-btn">Add New Area</button>
+            <button id="add-area-btn" class="btn btn-secondary">Add New Area</button>
         </section>
         
-        <section class="controls">
-            <button id="report-view-btn">Report View</button>
-            <button id="calendars-view-btn">Calendars View</button>
-            <button id="legend-view-btn">Legend View</button>
-            <button id="download-page-btn">Download Page</button>
+        <section class="card controls">
+            <button id="report-view-btn" class="btn btn-view">Report View</button>
+            <button id="calendars-view-btn" class="btn btn-view">Calendars View</button>
+            <button id="legend-view-btn" class="btn btn-view">Legend View</button>
+            <button id="download-page-btn" class="btn btn-view">Download Page</button>
         </section>
 
-        <section id="view-section"></section>
+        <section id="view-section" class="card"></section>
     </main>
 
-    <script src="utils.js"></script>
-    <script src="script.js"></script>
+    <script src="utils.js" type="module"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>
