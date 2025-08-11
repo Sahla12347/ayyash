@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gypsum Ceiling Project Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Project Planner</h1>
+    </header>
+    <main>
+        <section class="project-management">
+            <label for="project-select">Select Project:</label>
+            <select id="project-select"></select>
+            <button id="new-project-btn">New Project</button>
+            <button id="delete-project-btn">Delete Project</button>
+        </section>
+
+        <section class="task-input-section">
+            <div id="areas-container"></div>
+            <button id="add-area-btn">Add New Area</button>
+        </section>
+        
+        <section class="controls">
+            <button id="report-view-btn">Report View</button>
+            <button id="calendars-view-btn">Calendars View</button>
+            <button id="legend-view-btn">Legend View</button>
+            <button id="download-page-btn">Download Page</button>
+        </section>
+
+        <section id="view-section"></section>
+    </main>
+
+    <script src="utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
