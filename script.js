@@ -8,7 +8,34 @@ const projectSelect = document.getElementById('project-select');
 const areasContainer = document.getElementById('areas-container');
 const viewSection = document.getElementById('view-section');
 
-// Debounce function to limit the rate of function calls
+// Event Delegation for dynamic elements
+document.addEventListener('click', (e) => {
+    if (e.target.matches('.add-task-btn')) {
+        const areaIndex = e.target.dataset.areaIndex;
+        const project = getActiveProject();
+        if (project && project.areas[areaIndex]) {
+            const newTask = {
+                id: generateUUID(),
+                team: 'Gypsum',
+                startDate: '',
+                endDate: ''
+            };
+            project.areas[areaIndex].tasks.push(newTask);
+            saveProjects();
+            renderProjectAreas();
+        }
+    } else if (e.target.matches('.delete-task-btn')) {
+        const areaIndex = e.target.dataset.areaIndex;
+        const taskIndex = e.target.dataset.taskIndex;
+        const project = getActiveProject();
+        if (project && project.areas[areaIndex]) {
+            project.areas[areaIndex].tasks.splice(taskIndex, 1);
+            saveProjects();
+            renderProjectAreas();
+        }
+    }
+});
+
 const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
@@ -82,7 +109,7 @@ const renderProjectAreas = () => {
         areaBlock.innerHTML = `
             <div class="area-header">
                 <input type="text" class="area-name-input" value="${area.name}" data-area-index="${areaIndex}" placeholder="Area Name">
-                <button class="add-task-btn" data-area-index="${areaIndex}">Add New Task</button>
+                <button class="btn btn-secondary add-task-btn" data-area-index="${areaIndex}">Add New Task</button>
             </div>
             <div class="tasks-list"></div>
         `;
@@ -92,8 +119,6 @@ const renderProjectAreas = () => {
         });
         areasContainer.appendChild(areaBlock);
     });
-
-    attachEventListeners();
 };
 
 const createTaskRow = (task, areaIndex, taskIndex) => {
@@ -108,123 +133,97 @@ const createTaskRow = (task, areaIndex, taskIndex) => {
         </select>
         <input type="date" class="start-date-input" value="${task.startDate}" data-area-index="${areaIndex}" data-task-index="${taskIndex}">
         <input type="date" class="end-date-input" value="${task.endDate}" data-area-index="${areaIndex}" data-task-index="${taskIndex}">
-        <button class="delete-task-btn" data-area-index="${areaIndex}" data-task-index="${taskIndex}">Delete Task</button>
+        <button class="btn btn-danger delete-task-btn" data-area-index="${areaIndex}" data-task-index="${taskIndex}">Delete</button>
     `;
     return row;
 };
 
-const attachEventListeners = () => {
-    const debouncedSave = debounce(saveProjects, 500);
+// Event listeners for static elements
+projectSelect.addEventListener('change', (e) => setActiveProject(e.target.value));
+document.getElementById('new-project-btn').addEventListener('click', () => {
+    const projectName = prompt('Enter new project name:');
+    if (projectName) createNewProject(projectName);
+});
+document.getElementById('delete-project-btn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this project?')) {
+        deleteProject(activeProjectId);
+    }
+});
+document.getElementById('add-area-btn').addEventListener('click', () => {
+    const project = getActiveProject();
+    if (project) {
+        project.areas.push({ name: 'New Area', tasks: [] });
+        saveProjects();
+        renderProjectAreas();
+    }
+});
 
-    // Project management
-    projectSelect.addEventListener('change', (e) => setActiveProject(e.target.value));
-    document.getElementById('new-project-btn').addEventListener('click', () => {
-        const projectName = prompt('Enter new project name:');
-        if (projectName) createNewProject(projectName);
-    });
-    document.getElementById('delete-project-btn').addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this project?')) {
-            deleteProject(activeProjectId);
-        }
-    });
+// Event delegation for input changes
+areasContainer.addEventListener('input', debounce((e) => {
+    const project = getActiveProject();
+    if (!project) return;
+    const target = e.target;
+    const areaIndex = target.dataset.areaIndex;
+    const taskIndex = target.dataset.taskIndex;
 
-    // Areas and Tasks
-    document.getElementById('add-area-btn').addEventListener('click', () => {
-        const project = getActiveProject();
-        if (project) {
-            project.areas.push({ name: 'New Area', tasks: [] });
-            saveProjects();
-            renderProjectAreas();
-        }
-    });
-    areasContainer.querySelectorAll('.add-task-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const areaIndex = e.target.dataset.areaIndex;
-            const project = getActiveProject();
-            if (project && project.areas[areaIndex]) {
-                const newTask = {
-                    id: generateUUID(),
-                    team: 'Gypsum',
-                    startDate: '',
-                    endDate: ''
-                };
-                project.areas[areaIndex].tasks.push(newTask);
-                saveProjects();
-                renderProjectAreas();
-            }
-        });
-    });
-    areasContainer.querySelectorAll('.delete-task-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const areaIndex = e.target.dataset.areaIndex;
-            const taskIndex = e.target.dataset.task-index;
-            const project = getActiveProject();
-            if (project && project.areas[areaIndex]) {
-                project.areas[areaIndex].tasks.splice(taskIndex, 1);
-                saveProjects();
-                renderProjectAreas();
-            }
-        });
-    });
+    if (target.classList.contains('area-name-input')) {
+        project.areas[areaIndex].name = target.value;
+    } else if (target.classList.contains('team-select')) {
+        project.areas[areaIndex].tasks[taskIndex].team = target.value;
+    } else if (target.classList.contains('start-date-input')) {
+        project.areas[areaIndex].tasks[taskIndex].startDate = target.value;
+    } else if (target.classList.contains('end-date-input')) {
+        project.areas[areaIndex].tasks[taskIndex].endDate = target.value;
+    }
+    saveProjects();
+}, 500));
 
-    // Input changes
-    areasContainer.addEventListener('input', (e) => {
-        const project = getActiveProject();
-        if (!project) return;
-        const target = e.target;
-        const areaIndex = target.dataset.areaIndex;
-        const taskIndex = target.dataset.taskIndex;
 
-        if (target.classList.contains('area-name-input')) {
-            project.areas[areaIndex].name = target.value;
-        } else if (target.classList.contains('team-select')) {
-            project.areas[areaIndex].tasks[taskIndex].team = target.value;
-        } else if (target.classList.contains('start-date-input')) {
-            project.areas[areaIndex].tasks[taskIndex].startDate = target.value;
-        } else if (target.classList.contains('end-date-input')) {
-            project.areas[areaIndex].tasks[taskIndex].endDate = target.value;
-        }
-        debouncedSave();
-    });
+// Views
+document.getElementById('report-view-btn').addEventListener('click', renderReportView);
+document.getElementById('calendars-view-btn').addEventListener('click', () => window.location.href = 'dashboard.html');
+document.getElementById('legend-view-btn').addEventListener('click', renderLegendView);
+document.getElementById('download-page-btn').addEventListener('click', () => downloadPageAsImage('project-planner.png'));
 
-    // Views
-    document.getElementById('report-view-btn').addEventListener('click', renderReportView);
-    document.getElementById('calendars-view-btn').addEventListener('click', () => window.location.href = 'dashboard.html');
-    document.getElementById('legend-view-btn').addEventListener('click', renderLegendView);
-    document.getElementById('download-page-btn').addEventListener('click', () => downloadPageAsImage('project-planner.png'));
-};
 
 const renderReportView = () => {
     const project = getActiveProject();
-    if (!project) return;
+    if (!project) {
+        viewSection.innerHTML = '<p>No project selected.</p>';
+        return;
+    }
 
     let reportHTML = '<h2>Report View</h2>';
     project.areas.forEach(area => {
         reportHTML += `<h3>${area.name}</h3>`;
-        reportHTML += `
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        area.tasks.forEach(task => {
+        if (area.tasks.length === 0) {
+            reportHTML += '<p>No tasks for this area.</p>';
+        } else {
             reportHTML += `
-                <tr class="team-${task.team.toLowerCase()}">
-                    <td>${task.team}</td>
-                    <td>${task.startDate}</td>
-                    <td>${task.endDate}</td>
-                </tr>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
-        });
-        reportHTML += `
-                </tbody>
-            </table>
-        `;
+            area.tasks.forEach(task => {
+                reportHTML += `
+                    <tr class="team-${task.team.toLowerCase()}">
+                        <td>${task.team}</td>
+                        <td>${task.startDate}</td>
+                        <td>${task.endDate}</td>
+                    </tr>
+                `;
+            });
+            reportHTML += `
+                    </tbody>
+                </table>
+            `;
+        }
     });
     viewSection.innerHTML = reportHTML;
 };
@@ -248,5 +247,4 @@ const renderLegendView = () => {
     viewSection.innerHTML = legendHTML;
 };
 
-// Initial load
 document.addEventListener('DOMContentLoaded', loadProjects);
